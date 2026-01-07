@@ -2,234 +2,215 @@
 <html lang="en-GB">
 <head>
     <meta charset="UTF-8">
-    <title>CLS Master Admissions v14.0 | Guaranteed Logo</title>
+    <title>CLS Master Admissions v17.0 | Total Reconstruction</title>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;700&family=Outfit:wght@900&display=swap" rel="stylesheet">
     <style>
-        :root { --cls-red: #ff3e3e; --neon-blue: #00f2ff; --neon-green: #39ff14; --glass: rgba(10, 15, 30, 0.95); --gold: #ffd700; }
+        :root { --cls-red: #ff3e3e; --neon-blue: #00f2ff; --neon-green: #39ff14; --glass: rgba(10, 15, 30, 0.98); --gold: #ffd700; }
         body, html { margin: 0; padding: 0; height: 100vh; width: 100%; font-family: 'Fredoka', sans-serif; background: #010208; color: white; overflow: hidden; }
         #canvas { position: fixed; top: 0; left: 0; z-index: -1; }
-        
-        /* 1. FIXED TOP LOGO BAR - VISIBLE ON EVERY PAGE */
-        .global-header { 
-            position: fixed; 
-            top: 0; left: 0; width: 100%; 
-            height: 70px; 
-            background: rgba(0,0,0,0.8); 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            z-index: 9999; /* Highest priority */
-            border-bottom: 1px solid var(--neon-blue);
-        }
-        .global-header img { height: 50px; display: block; }
-        .logo-text-fallback { font-family: 'Outfit'; color: var(--cls-red); font-size: 1.2rem; margin-left: 10px; }
 
-        .app-container { display: flex; height: 100vh; padding-top: 70px; box-sizing: border-box; }
+        /* HEADER & LOGO AREA */
+        .global-header { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 90px; 
+            background: #000; border-bottom: 3px solid var(--cls-red);
+            display: flex; align-items: center; justify-content: center; z-index: 10000;
+        }
+        .global-header img { height: 70px; display: block; }
+        /* Emergency Logo Backup if image fails */
+        .logo-backup { display: none; background: var(--cls-red); color: white; padding: 10px 20px; font-family: 'Outfit'; font-size: 1.5rem; border-radius: 5px; }
+
+        .app-container { display: flex; height: 100vh; padding-top: 90px; box-sizing: border-box; }
         
-        /* STAGE LAYOUT */
+        /* STUDENT INTERFACE */
         .student-stage { flex: 2; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; border-right: 2px solid var(--neon-blue); }
         .slide { display: none; width: 90%; text-align: center; }
-        .slide.active { display: block; }
+        .slide.active { display: block; animation: fadeIn 0.3s; }
         
-        .big-prompt { font-size: 2rem; font-family: 'Outfit'; text-shadow: 0 0 10px var(--neon-blue); margin-top: 10px; }
-        .pilot-label { background: var(--neon-green); color: black; padding: 4px 12px; border-radius: 20px; font-weight: 900; margin-bottom: 15px; display: inline-block; font-size: 0.75rem; }
+        .pilot-label { background: var(--neon-green); color: black; padding: 5px 15px; border-radius: 20px; font-weight: 900; margin-bottom: 20px; display: inline-block; }
+        .logic-box { background: rgba(0,0,0,0.8); padding: 30px; border-radius: 30px; border: 2px dashed var(--neon-blue); width: 100%; max-width: 500px; margin: 0 auto; }
+        .big-prompt { font-size: 2.5rem; font-family: 'Outfit'; text-shadow: 0 0 10px var(--neon-blue); }
 
-        .logic-box { background: rgba(0,0,0,0.75); padding: 20px; border-radius: 20px; border: 2px dashed var(--neon-blue); width: 100%; max-width: 480px; margin: 0 auto; }
-        .grid-container { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; padding: 10px; }
-        .game-card { font-size: 1.3rem; background: white; color: black; padding: 10px; border-radius: 8px; border: none; font-weight: bold; }
+        /* COMMAND HUD SCORING */
+        .teacher-hud { flex: 1.3; background: var(--glass); padding: 10px; overflow-y: auto; border-left: 1px solid #333; }
+        .hud-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
+        .student-card { background: rgba(255,255,255,0.05); padding: 6px; border-radius: 10px; border-top: 4px solid #444; text-align: center; }
+        .student-card.active { border-top-color: var(--neon-blue); }
+        
+        .phase-row { margin-top: 8px; border-top: 1px solid #222; padding-top: 5px; }
+        .phase-title { font-size: 0.5rem; color: var(--neon-blue); font-weight: 900; text-transform: uppercase; margin-bottom: 3px; }
+        .btn-box { display: flex; gap: 2px; }
+        
+        .score-btn { flex: 1; font-size: 0.5rem; padding: 5px 0; border: none; cursor: pointer; background: #222; color: #555; font-weight: 900; border-radius: 3px; }
+        /* Unique Active states ensure only the clicked button lights up */
+        .score-btn.yes-btn.active { background: var(--neon-green) !important; color: #000 !important; }
+        .score-btn.no-btn.active { background: var(--cls-red) !important; color: #fff !important; }
 
-        /* COMMAND HUD */
-        .teacher-hud { flex: 1; background: var(--glass); padding: 10px; display: flex; flex-direction: column; border-left: 1px solid #333; overflow-y: auto; }
-        .hud-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
-        .student-card { background: rgba(255,255,255,0.05); padding: 6px; border-radius: 8px; border-top: 3px solid #444; text-align: center; }
-        .phase-label { font-size: 0.45rem; color: #aaa; font-weight: 900; text-transform: uppercase; margin-top: 6px; }
-        .btn-score { width: 100%; font-size: 0.45rem; padding: 4px 0; border-radius: 3px; border: none; cursor: pointer; font-weight: bold; background: #222; color: white; }
-        .btn-score.yes.active { background: var(--neon-green); color: black; }
-        .btn-score.no.active { background: var(--cls-red); color: white; }
-
-        /* PRINT SUMMARY */
-        #reportGallery { display: flex; flex-direction: column; gap: 6px; width: 100%; max-width: 780px; margin: 0 auto; }
-        .score-strip { background: white; color: black; padding: 8px 15px; border-radius: 6px; border: 2px solid #000; display: grid; grid-template-columns: 1.2fr 1fr 2fr; gap: 10px; align-items: center; text-align: left; }
-        .score-strip h3 { margin: 0; font-size: 0.9rem; color: var(--cls-red); }
-        .final-score { background: black; color: var(--neon-green); padding: 4px 10px; border-radius: 15px; font-weight: 900; font-size: 0.8rem; text-align: center; }
-        .tag-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; font-size: 0.45rem; }
-        .tag { padding: 2px; border-radius: 3px; border: 1px solid #eee; color: #ddd; text-align: center; }
-        .tag.pass { background: #e6fffa; color: #1d4044; border-color: #b2f5ea; }
-
-        .controls { position: absolute; bottom: 15px; display: flex; gap: 12px; }
-        .btn-action { padding: 10px 20px; border-radius: 30px; border: none; font-weight: 900; cursor: pointer; font-size: 0.75rem; background: var(--neon-blue); color: black; }
+        .btn-action { padding: 15px 30px; border-radius: 40px; border: none; font-weight: 900; cursor: pointer; background: var(--neon-blue); color: black; margin-top: 20px; }
 
         @media print {
-            #canvas, .teacher-hud, .controls, .print-hide, .pilot-label, .btn-cycle { display: none !important; }
-            body, html { background: white !important; overflow: visible !important; }
-            .global-header { position: relative !important; background: white !important; border-bottom: 2px solid black !important; height: auto !important; padding: 10px 0 !important; }
-            .global-header img { filter: none !important; }
+            #canvas, .teacher-hud, .btn-action, .pilot-label { display: none !important; }
+            body, html { background: white !important; color: black !important; overflow: visible !important; }
+            .global-header { position: relative !important; background: white !important; border-bottom: 3px solid black !important; padding: 20px 0; }
             .app-container { padding-top: 0 !important; display: block !important; }
-            .student-stage { border: none !important; width: 100% !important; padding: 0 !important; display: block !important; }
-            .slide { display: block !important; }
-            .score-strip { border: 2px solid black !important; page-break-inside: avoid; height: 1.6cm; margin-bottom: 5px !important; }
+            .student-stage { border: none !important; width: 100% !important; display: block !important; }
+            .slide { display: block !important; page-break-after: always; }
         }
     </style>
 </head>
 <body>
 
 <canvas id="canvas"></canvas>
-<audio id="ambientLoop" loop><source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" type="audio/mpeg"></audio>
 
 <div class="global-header">
-    <img src="https://i.ibb.co/XkyT8b0/CLS-Logo-2.png" alt="CLS Logo" onerror="this.style.display='none'; document.getElementById('fallback').style.display='block';">
-    <div id="fallback" class="logo-text-fallback" style="display:none;">CLS ADMISSIONS</div>
+    <img id="clsLogo" src="https://i.ibb.co/XkyT8b0/CLS-Logo-2.png" alt="CLS School Logo" onerror="this.style.display='none'; document.getElementById('logoFallback').style.display='block';">
+    <div id="logoFallback" class="logo-backup">CLS ADMISSIONS</div>
 </div>
 
 <div class="app-container">
     <div class="student-stage">
         <div id="s0" class="slide active">
-            <h1 class="big-prompt">ADMISSIONS 2025</h1>
-            <p style="color: var(--neon-blue);">Enter Flight Crew Names:</p>
-            <input type="text" id="crewNames" value="Child 1, Child 2, Child 3, Child 4, Child 5" 
-                   style="width: 280px; padding: 12px; border-radius: 10px; background: black; color: white; border: 1px solid var(--neon-blue); text-align: center; margin-bottom: 20px;">
-            <br><button class="btn-action" onclick="initApp()">ENGAGE ENGINES 🚀</button>
+            <h1 class="big-prompt">G1 ADMISSIONS 2025</h1>
+            <p>Enter Student Names:</p>
+            <input type="text" id="nameInput" value="Child 1, Child 2, Child 3, Child 4, Child 5" style="width: 300px; padding: 12px; border-radius: 10px; background: #000; color: #fff; border: 1px solid var(--neon-blue); text-align: center;">
+            <br><button class="btn-action" onclick="init()">ENGAGE ENGINES 🚀</button>
         </div>
 
         <div id="s1" class="slide">
-            <div class="pilot-label" id="p1">Pilot</div>
-            <div class="logic-box"><h2 id="q1" style="font-size: 1.5rem;">"What is your name?"</h2></div>
-            <button class="btn-action" style="margin-top:15px; background:white; color:black;" onclick="cycle(1)">NEXT QUESTION ➔</button>
+            <div class="pilot-label" id="L1">Pilot</div>
+            <div class="logic-box"><h2 id="Q1" style="font-size: 1.8rem;">"What is your name?"</h2></div>
+            <button class="btn-action" style="background:#fff;" onclick="cycle(1)">NEXT QUESTION ➔</button>
         </div>
 
         <div id="s2" class="slide">
-            <div class="pilot-label" id="p2">Pilot</div>
-            <div id="g2" class="grid-container" style="background:rgba(0,0,0,0.5);border-radius:15px;"></div>
-            <button class="btn-action" style="margin-top:15px; background:white; color:black;" onclick="cycle(2)">REFRESH ➔</button>
+            <div class="pilot-label" id="L2">Pilot</div>
+            <div id="G2" style="display:grid; grid-template-columns: repeat(6, 1fr); gap: 8px;"></div>
+            <button class="btn-action" style="background:#fff;" onclick="cycle(2)">REFRESH ➔</button>
         </div>
 
         <div id="s3" class="slide">
-            <div class="pilot-label" id="p3">Pilot</div>
-            <h2 id="t3" style="font-size:1.2rem;">Find the Stars!</h2>
-            <div id="g3" class="grid-container" style="background:rgba(0,0,0,0.5);border-radius:15px;"></div>
-            <button class="btn-action" style="margin-top:15px; background:white; color:black;" onclick="cycle(3)">CHANGE ➔</button>
+            <div class="pilot-label" id="L3">Pilot</div>
+            <h2 style="margin-bottom:10px;">Find the Stars!</h2>
+            <div id="G3" style="display:grid; grid-template-columns: repeat(6, 1fr); gap: 8px;"></div>
+            <button class="btn-action" style="background:#fff;" onclick="cycle(3)">CHANGE ➔</button>
         </div>
 
         <div id="s4" class="slide">
-            <div class="pilot-label" id="p4">Pilot</div>
-            <div class="logic-box"><h2 id="l4" style="font-size: 3rem;">1 2 3 ?</h2><p style="color:var(--neon-blue);">"What comes next?"</p></div>
-            <button class="btn-action" style="margin-top:15px; background:white; color:black;" onclick="cycle(4)">NEXT ➔</button>
+            <div class="pilot-label" id="L4">Pilot</div>
+            <div class="logic-box"><h1 id="Q4" style="font-size: 4rem;">1 2 3 ?</h1><p style="color:var(--neon-blue);">"What comes next?"</p></div>
+            <button class="btn-action" style="background:#fff;" onclick="cycle(4)">NEXT ➔</button>
         </div>
 
         <div id="s5" class="slide">
-            <div class="pilot-label" id="p5">Pilot</div>
-            <div class="logic-box"><div id="balloons" style="display:flex; justify-content:center; gap:8px; margin-bottom:15px;"></div><h2 id="c5" style="font-size:1.2rem; color:var(--neon-blue);">"Command..."</h2></div>
-            <button class="btn-action" style="margin-top:15px; background:white; color:black;" onclick="cycle(5)">NEXT ➔</button>
-        </div>
-
-        <div id="s6" class="slide" style="overflow-y:auto; height:calc(100vh - 100px); padding: 20px 0;">
-            <div class="print-hide">
-                <h2 style="color:var(--neon-green); font-size: 1.5rem;">MISSION COMPLETE</h2>
-                <button class="btn-action" onclick="window.print()" style="background:white; color:black; margin-bottom:10px;">PRINT SUMMARY 🖨️</button>
+            <div class="pilot-label" id="L5">Pilot</div>
+            <div class="logic-box">
+                <div id="balloonBox" style="display:flex; justify-content:center; gap:10px; margin-bottom: 20px;"></div>
+                <h2 id="Q5" style="color:var(--neon-blue);">"Find Red!"</h2>
             </div>
-            <div id="reportGallery"></div>
+            <button class="btn-action" style="background:#fff;" onclick="cycle(5)">NEXT ➔</button>
         </div>
 
-        <div class="controls" id="nav" style="display:none;">
-            <button class="btn-action" style="background:#333; color:#aaa;" onclick="move(-1)">PREV</button>
-            <button class="btn-action" onclick="move(1)">NEXT PHASE</button>
+        <div id="s6" class="slide">
+            <h1 class="big-prompt" style="color:var(--neon-green);">MISSION SUCCESS</h1>
+            <button class="btn-action" onclick="window.print()" style="background:#fff; color:#000;">PRINT SUMMARY 🖨️</button>
+            <div id="printReport" style="background:white; color:black; margin-top: 20px; border-radius: 10px; text-align: left;"></div>
+        </div>
+
+        <div id="nav" style="display:none;" class="btn-action">
+            <button onclick="move(-1)" style="background:none; border:none; color:inherit; font-weight:900; cursor:pointer;">PREV</button> | 
+            <button onclick="move(1)" style="background:none; border:none; color:inherit; font-weight:900; cursor:pointer;">NEXT PHASE</button>
         </div>
     </div>
 
     <div class="teacher-hud">
-        <div style="text-align:center; font-weight:900; color:var(--cls-red); font-size:0.8rem; margin-bottom:10px; border-bottom:1px solid #333;">COMMAND HUD</div>
-        <div class="hud-grid" id="hGrid"></div>
+        <h3 style="text-align:center; font-size: 0.8rem; color: var(--cls-red);">COMMAND HUD</h3>
+        <div class="hud-grid" id="hud"></div>
     </div>
 </div>
 
 <script>
-    let pilots = [], cur = 0, scores = [0,0,0,0,0], logs = [{},{},{},{},{}];
-    let sub = [0,0,0,0,0,0];
+    let names = [], cur = 0, scoreData = [{},{},{},{},{}], subIdx = [0,0,0,0,0,0];
+    const qs = ["What is your name?", "How old are you?", "How are you today?", "What is your favorite animal?", "What color is this?"];
+    const log = ["1 2 3 ?", "A B A ?", "🍎 🍌 🍎 ?", "2 4 6 ?", "🔴 🔵 🔴 ?"];
 
-    const simpleUK = ["What is your name?", "How old are you?", "How are you today?", "What is your favourite animal?", "What is your favourite colour?"];
-    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    const spySets = ["Aa", "Bb", "Mm", "Ss", "Cc"];
-    const puzzles = [{s:"1 2 3 ?", a:"4"}, {s:"🍎 🍌 🍎 ?", a:"🍌"}, {s:"A B A ?", a:"B"}, {s:"2 4 6 ?", a:"8"}, {s:"🔴 🔵 🔴 ?", a:"🔵"}];
-    const colours = ["RED", "BLUE", "GREEN", "YELLOW", "PINK"];
-
-    function initApp() {
-        let val = document.getElementById('crewNames').value;
-        pilots = val ? val.split(',').map(n => n.trim()) : ["Child 1", "Child 2", "Child 3", "Child 4", "Child 5"];
-        document.getElementById('ambientLoop').play();
-        document.getElementById('nav').style.display = 'flex';
+    function init() {
+        names = document.getElementById('nameInput').value.split(',').map(n => n.trim());
+        document.getElementById('nav').style.display = 'block';
         renderHud(); refreshUI(); move(1);
     }
 
     function renderHud() {
-        document.getElementById('hGrid').innerHTML = pilots.slice(0,5).map((n, i) => `
-            <div class="student-card" id="card${i}">
-                <div style="font-size:0.5rem; color:var(--neon-blue); font-weight:900;">${n}</div>
-                <div id="score${i}" style="font-weight:900; color:var(--gold); font-size:0.8rem;">0%</div>
-                ${['Comms','Phonics','Visual','Logic','Colours'].map((label, idx) => {
-                    const keys = ['c','p','v','l','k'];
-                    return `<div class="phase-label">${label}</div>
-                            <button class="btn-score yes" onclick="mark(${i},'${keys[idx]}',true,this)">YES</button>
-                            <button class="btn-score no" onclick="mark(${i},'${keys[idx]}',false,this)">NO</button>`;
-                }).join('')}
+        const keys = ['c','p','v','l','k'];
+        const labels = ['Comms', 'Phonics', 'Visual', 'Logic', 'Colours'];
+        document.getElementById('hud').innerHTML = names.slice(0,5).map((n, sIdx) => `
+            <div class="student-card" id="card${sIdx}">
+                <div style="font-size: 0.5rem; font-weight:900; color:var(--neon-blue);">${n}</div>
+                <div id="total${sIdx}" style="font-size: 1rem; color:var(--gold); font-weight:900;">0%</div>
+                ${keys.map((k, i) => `
+                    <div class="phase-row">
+                        <div class="phase-title">${labels[i]}</div>
+                        <div class="btn-box">
+                            <button id="y-${sIdx}-${k}" class="score-btn yes-btn" onclick="updateScore(${sIdx},'${k}',true)">YES</button>
+                            <button id="n-${sIdx}-${k}" class="score-btn no-btn" onclick="updateScore(${sIdx},'${k}',false)">NO</button>
+                        </div>
+                    </div>
+                `).join('')}
             </div>
         `).join('');
     }
 
-    function mark(p, k, ok, b) {
-        if(logs[p][k] !== ok) { if(ok) scores[p]+=20; else if(logs[p][k]===true) scores[p]-=20; }
-        logs[p][k] = ok;
-        b.parentElement.querySelectorAll('.btn-score').forEach(btn => { 
-            if(btn.innerText===(ok?'YES':'NO')) btn.classList.add('active'); 
-            else btn.classList.remove('active'); 
-        });
-        document.getElementById(`score${p}`).innerText = scores[p]+"%";
+    function updateScore(sIdx, phase, val) {
+        scoreData[sIdx][phase] = val;
+        // Independent Button Reset
+        document.getElementById(`y-${sIdx}-${phase}`).classList.remove('active');
+        document.getElementById(`n-${sIdx}-${phase}`).classList.remove('active');
+        // Only light up what was clicked
+        document.getElementById(`${val?'y':'n'}-${sIdx}-${phase}`).classList.add('active');
+        
+        let count = 0;
+        ['c','p','v','l','k'].forEach(key => { if(scoreData[sIdx][key] === true) count++; });
+        document.getElementById(`total${sIdx}`).innerText = (count * 20) + "%";
     }
 
     function move(d) {
         document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
         cur += d;
-        if(document.getElementById(`s${cur}`)) document.getElementById(`s${cur}`).classList.add('active');
-        if(cur === 6) { renderSummary(); document.getElementById('nav').style.display='none'; }
+        if(document.getElementById('s'+cur)) document.getElementById('s'+cur).classList.add('active');
+        if(cur === 6) buildReport();
     }
 
-    function cycle(p) { sub[p] = (sub[p]+1)%5; refreshUI(); }
+    function cycle(p) { subIdx[p] = (subIdx[p]+1)%5; refreshUI(); }
 
     function refreshUI() {
-        document.getElementById('p1').innerText = pilots[sub[1]]; document.getElementById('q1').innerText = `"${simpleUK[sub[1]]}"`;
-        document.getElementById('p2').innerText = pilots[sub[2]]; document.getElementById('g2').innerHTML = letters.split('').sort(()=>.5-Math.random()).slice(0,18).map(l => `<button class="game-card">${l}</button>`).join('');
-        document.getElementById('p3').innerText = pilots[sub[3]]; document.getElementById('t3').innerText = `Find the ${spySets[sub[3]]} Stars!`;
-        document.getElementById('g3').innerHTML = Array(24).fill(0).map(()=>`<button class="game-card">${spySets[Math.floor(Math.random()*5)]}</button>`).join('');
-        document.getElementById('p4').innerText = pilots[sub[4]]; document.getElementById('l4').innerText = puzzles[sub[4]].s;
-        document.getElementById('p5').innerText = pilots[sub[5]]; document.getElementById('c5').innerText = `"Find the ${colours[sub[5]]} balloon!"`;
-        document.getElementById('balloons').innerHTML = ['red','blue','green','yellow','pink'].map(c => `<div style="width:30px; height:40px; border-radius:50%; background:${c};"></div>`).join('');
+        const alph = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        const pho = ["Aa", "Bb", "Mm", "Ss", "Cc"];
+        document.getElementById('L1').innerText = names[subIdx[1]]; document.getElementById('Q1').innerText = `"${qs[subIdx[1]]}"`;
+        document.getElementById('L2').innerText = names[subIdx[2]]; document.getElementById('G2').innerHTML = alph.split('').sort(()=>.5-Math.random()).slice(0,18).map(l => `<div style="background:white; color:black; padding:10px; font-weight:bold; border-radius:5px;">${l}</div>`).join('');
+        document.getElementById('L3').innerText = names[subIdx[3]]; document.getElementById('G3').innerHTML = Array(24).fill(0).map(()=>`<div style="background:white; color:black; padding:8px; border-radius:5px;">${pho[Math.floor(Math.random()*5)]}</div>`).join('');
+        document.getElementById('L4').innerText = names[subIdx[4]]; document.getElementById('Q4').innerText = log[subIdx[4]];
+        document.getElementById('L5').innerText = names[subIdx[5]]; document.getElementById('balloonBox').innerHTML = ['red','blue','green','yellow','pink'].map(c => `<div style="width:30px; height:40px; border-radius:50%; background:${c}"></div>`).join('');
     }
 
-    function renderSummary() {
-        document.getElementById('reportGallery').innerHTML = pilots.slice(0,5).map((n, i) => `
-            <div class="score-strip">
-                <div><h3>${n.toUpperCase()}</h3></div>
-                <div class="final-score">SCORE: ${scores[i]}%</div>
-                <div class="tag-container">
-                    <div class="tag ${logs[i].c?'pass':''}">COMMS</div>
-                    <div class="tag ${logs[i].p?'pass':''}">PHONICS</div>
-                    <div class="tag ${logs[i].v?'pass':''}">VISUAL</div>
-                    <div class="tag ${logs[i].l?'pass':''}">LOGIC</div>
-                    <div class="tag ${logs[i].k?'pass':''}">COLOURS</div>
-                </div>
-            </div>
-        `).join('');
+    function buildReport() {
+        document.getElementById('printReport').innerHTML = names.slice(0,5).map((n, i) => {
+            let count = 0; ['c','p','v','l','k'].forEach(k => { if(scoreData[i][k] === true) count++; });
+            return `<div style="padding:15px; border-bottom:2px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+                <b style="font-size:1.2rem;">${n.toUpperCase()}</b>
+                <span style="font-weight:900; background:#000; color:#39ff14; padding:5px 15px; border-radius:20px;">READY: ${count*20}%</span>
+            </div>`;
+        }).join('');
     }
 
+    // STARFIELD
     const canvas = document.getElementById('canvas'); const ctx = canvas.getContext('2d');
-    let sts = []; function rsz() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-    window.onresize = rsz; rsz();
-    for(let i=0; i<70; i++) sts.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, s:Math.random()*1.5});
-    function drw() {
+    let stars = []; function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+    window.onresize = resize; resize();
+    for(let i=0; i<80; i++) stars.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, s:Math.random()*1.5});
+    function draw() {
         ctx.clearRect(0,0,canvas.width, canvas.height); ctx.fillStyle="white";
-        sts.forEach(s => { ctx.beginPath(); ctx.arc(s.x, s.y, s.s, 0, Math.PI*2); ctx.fill(); s.y+=0.08; if(s.y>canvas.height) s.y=0; });
-        requestAnimationFrame(drw);
+        stars.forEach(s => { ctx.beginPath(); ctx.arc(s.x, s.y, s.s, 0, Math.PI*2); ctx.fill(); s.y+=0.1; if(s.y>canvas.height) s.y=0; });
+        requestAnimationFrame(draw);
     }
-    drw();
+    draw();
 </script>
 </body>
 </html>
