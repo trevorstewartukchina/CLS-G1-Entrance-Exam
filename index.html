@@ -2,25 +2,36 @@
 <html lang="en-GB">
 <head>
     <meta charset="UTF-8">
-    <title>CLS Master Admissions v13.0 | Persistent Logo Edition</title>
+    <title>CLS Master Admissions v14.0 | Guaranteed Logo</title>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;700&family=Outfit:wght@900&display=swap" rel="stylesheet">
     <style>
         :root { --cls-red: #ff3e3e; --neon-blue: #00f2ff; --neon-green: #39ff14; --glass: rgba(10, 15, 30, 0.95); --gold: #ffd700; }
         body, html { margin: 0; padding: 0; height: 100vh; width: 100%; font-family: 'Fredoka', sans-serif; background: #010208; color: white; overflow: hidden; }
         #canvas { position: fixed; top: 0; left: 0; z-index: -1; }
-        .app-container { display: flex; height: 100vh; }
         
-        /* HEADER LOGO - PERSISTENT */
-        .persistent-header { width: 100%; padding: 10px 0; text-align: center; position: absolute; top: 0; left: 0; z-index: 10; display: none; }
-        .persistent-header img { height: 50px; filter: drop-shadow(0 0 5px rgba(0,242,255,0.5)); }
+        /* 1. FIXED TOP LOGO BAR - VISIBLE ON EVERY PAGE */
+        .global-header { 
+            position: fixed; 
+            top: 0; left: 0; width: 100%; 
+            height: 70px; 
+            background: rgba(0,0,0,0.8); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            z-index: 9999; /* Highest priority */
+            border-bottom: 1px solid var(--neon-blue);
+        }
+        .global-header img { height: 50px; display: block; }
+        .logo-text-fallback { font-family: 'Outfit'; color: var(--cls-red); font-size: 1.2rem; margin-left: 10px; }
 
-        /* STAGE LAYOUT */
-        .student-stage { flex: 2; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; border-right: 2px solid var(--neon-blue); margin-top: 40px; }
-        .slide { display: none; width: 90%; text-align: center; }
-        .slide.active { display: block; animation: fadeIn 0.4s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .app-container { display: flex; height: 100vh; padding-top: 70px; box-sizing: border-box; }
         
-        .big-prompt { font-size: 2rem; font-family: 'Outfit'; text-shadow: 0 0 10px var(--neon-blue); margin-bottom: 5px; }
+        /* STAGE LAYOUT */
+        .student-stage { flex: 2; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; border-right: 2px solid var(--neon-blue); }
+        .slide { display: none; width: 90%; text-align: center; }
+        .slide.active { display: block; }
+        
+        .big-prompt { font-size: 2rem; font-family: 'Outfit'; text-shadow: 0 0 10px var(--neon-blue); margin-top: 10px; }
         .pilot-label { background: var(--neon-green); color: black; padding: 4px 12px; border-radius: 20px; font-weight: 900; margin-bottom: 15px; display: inline-block; font-size: 0.75rem; }
 
         .logic-box { background: rgba(0,0,0,0.75); padding: 20px; border-radius: 20px; border: 2px dashed var(--neon-blue); width: 100%; max-width: 480px; margin: 0 auto; }
@@ -30,9 +41,8 @@
         /* COMMAND HUD */
         .teacher-hud { flex: 1; background: var(--glass); padding: 10px; display: flex; flex-direction: column; border-left: 1px solid #333; overflow-y: auto; }
         .hud-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
-        .student-card { background: rgba(255,255,255,0.05); padding: 6px; border-radius: 8px; border-top: 3px solid #444; text-align: center; transition: 0.3s; }
-        .student-card.active { border-top-color: var(--neon-blue); background: rgba(0,242,255,0.05); }
-        .phase-label { font-size: 0.45rem; color: #aaa; font-weight: 900; text-transform: uppercase; margin-top: 6px; margin-bottom: 2px; }
+        .student-card { background: rgba(255,255,255,0.05); padding: 6px; border-radius: 8px; border-top: 3px solid #444; text-align: center; }
+        .phase-label { font-size: 0.45rem; color: #aaa; font-weight: 900; text-transform: uppercase; margin-top: 6px; }
         .btn-score { width: 100%; font-size: 0.45rem; padding: 4px 0; border-radius: 3px; border: none; cursor: pointer; font-weight: bold; background: #222; color: white; }
         .btn-score.yes.active { background: var(--neon-green); color: black; }
         .btn-score.no.active { background: var(--cls-red); color: white; }
@@ -40,25 +50,24 @@
         /* PRINT SUMMARY */
         #reportGallery { display: flex; flex-direction: column; gap: 6px; width: 100%; max-width: 780px; margin: 0 auto; }
         .score-strip { background: white; color: black; padding: 8px 15px; border-radius: 6px; border: 2px solid #000; display: grid; grid-template-columns: 1.2fr 1fr 2fr; gap: 10px; align-items: center; text-align: left; }
-        .score-strip h3 { margin: 0; font-size: 0.9rem; color: var(--cls-red); font-family: 'Outfit'; }
+        .score-strip h3 { margin: 0; font-size: 0.9rem; color: var(--cls-red); }
         .final-score { background: black; color: var(--neon-green); padding: 4px 10px; border-radius: 15px; font-weight: 900; font-size: 0.8rem; text-align: center; }
-        .tag-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; text-align: center; font-size: 0.45rem; font-weight: bold; }
-        .tag { padding: 2px; border-radius: 3px; border: 1px solid #eee; color: #ddd; }
+        .tag-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; font-size: 0.45rem; }
+        .tag { padding: 2px; border-radius: 3px; border: 1px solid #eee; color: #ddd; text-align: center; }
         .tag.pass { background: #e6fffa; color: #1d4044; border-color: #b2f5ea; }
 
-        /* CONTROLS */
         .controls { position: absolute; bottom: 15px; display: flex; gap: 12px; }
         .btn-action { padding: 10px 20px; border-radius: 30px; border: none; font-weight: 900; cursor: pointer; font-size: 0.75rem; background: var(--neon-blue); color: black; }
 
         @media print {
             #canvas, .teacher-hud, .controls, .print-hide, .pilot-label, .btn-cycle { display: none !important; }
             body, html { background: white !important; overflow: visible !important; }
-            .persistent-header { display: block !important; position: static !important; margin-bottom: 10px; }
-            .persistent-header img { filter: none !important; }
-            .student-stage { border: none !important; width: 100% !important; padding: 0 !important; display: block !important; margin-top: 0; }
+            .global-header { position: relative !important; background: white !important; border-bottom: 2px solid black !important; height: auto !important; padding: 10px 0 !important; }
+            .global-header img { filter: none !important; }
+            .app-container { padding-top: 0 !important; display: block !important; }
+            .student-stage { border: none !important; width: 100% !important; padding: 0 !important; display: block !important; }
             .slide { display: block !important; }
             .score-strip { border: 2px solid black !important; page-break-inside: avoid; height: 1.6cm; margin-bottom: 5px !important; }
-            .final-score { background: transparent !important; color: black !important; border: 1.5px solid black !important; }
         }
     </style>
 </head>
@@ -67,18 +76,19 @@
 <canvas id="canvas"></canvas>
 <audio id="ambientLoop" loop><source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" type="audio/mpeg"></audio>
 
-<div class="persistent-header" id="logoWrap">
-    <img src="https://i.ibb.co/XkyT8b0/CLS-Logo-2.png" alt="CLS School Logo">
+<div class="global-header">
+    <img src="https://i.ibb.co/XkyT8b0/CLS-Logo-2.png" alt="CLS Logo" onerror="this.style.display='none'; document.getElementById('fallback').style.display='block';">
+    <div id="fallback" class="logo-text-fallback" style="display:none;">CLS ADMISSIONS</div>
 </div>
 
 <div class="app-container">
     <div class="student-stage">
         <div id="s0" class="slide active">
-            <img src="https://i.ibb.co/XkyT8b0/CLS-Logo-2.png" style="height:80px; margin-bottom: 20px;">
             <h1 class="big-prompt">ADMISSIONS 2025</h1>
+            <p style="color: var(--neon-blue);">Enter Flight Crew Names:</p>
             <input type="text" id="crewNames" value="Child 1, Child 2, Child 3, Child 4, Child 5" 
                    style="width: 280px; padding: 12px; border-radius: 10px; background: black; color: white; border: 1px solid var(--neon-blue); text-align: center; margin-bottom: 20px;">
-            <br><button class="btn-action" onclick="initAssessment()">ENGAGE ENGINES 🚀</button>
+            <br><button class="btn-action" onclick="initApp()">ENGAGE ENGINES 🚀</button>
         </div>
 
         <div id="s1" class="slide">
@@ -90,36 +100,32 @@
         <div id="s2" class="slide">
             <div class="pilot-label" id="p2">Pilot</div>
             <div id="g2" class="grid-container" style="background:rgba(0,0,0,0.5);border-radius:15px;"></div>
-            <button class="btn-action" style="margin-top:15px; background:white; color:black;" onclick="cycle(2)">REFRESH LETTERS ➔</button>
+            <button class="btn-action" style="margin-top:15px; background:white; color:black;" onclick="cycle(2)">REFRESH ➔</button>
         </div>
 
         <div id="s3" class="slide">
             <div class="pilot-label" id="p3">Pilot</div>
             <h2 id="t3" style="font-size:1.2rem;">Find the Stars!</h2>
             <div id="g3" class="grid-container" style="background:rgba(0,0,0,0.5);border-radius:15px;"></div>
-            <button class="btn-action" style="margin-top:15px; background:white; color:black;" onclick="cycle(3)">CHANGE TARGET ➔</button>
+            <button class="btn-action" style="margin-top:15px; background:white; color:black;" onclick="cycle(3)">CHANGE ➔</button>
         </div>
 
         <div id="s4" class="slide">
             <div class="pilot-label" id="p4">Pilot</div>
             <div class="logic-box"><h2 id="l4" style="font-size: 3rem;">1 2 3 ?</h2><p style="color:var(--neon-blue);">"What comes next?"</p></div>
-            <button class="btn-action" style="margin-top:15px; background:white; color:black;" onclick="cycle(4)">NEXT PUZZLE ➔</button>
+            <button class="btn-action" style="margin-top:15px; background:white; color:black;" onclick="cycle(4)">NEXT ➔</button>
         </div>
 
         <div id="s5" class="slide">
             <div class="pilot-label" id="p5">Pilot</div>
             <div class="logic-box"><div id="balloons" style="display:flex; justify-content:center; gap:8px; margin-bottom:15px;"></div><h2 id="c5" style="font-size:1.2rem; color:var(--neon-blue);">"Command..."</h2></div>
-            <button class="btn-action" style="margin-top:15px; background:white; color:black;" onclick="cycle(5)">NEXT COLOUR ➔</button>
+            <button class="btn-action" style="margin-top:15px; background:white; color:black;" onclick="cycle(5)">NEXT ➔</button>
         </div>
 
-        <div id="s6" class="slide" style="overflow-y:auto; height:100vh; padding: 20px 0;">
+        <div id="s6" class="slide" style="overflow-y:auto; height:calc(100vh - 100px); padding: 20px 0;">
             <div class="print-hide">
                 <h2 style="color:var(--neon-green); font-size: 1.5rem;">MISSION COMPLETE</h2>
                 <button class="btn-action" onclick="window.print()" style="background:white; color:black; margin-bottom:10px;">PRINT SUMMARY 🖨️</button>
-                <button class="btn-action" onclick="move(-1)" style="background:#333; color:white;">BACK TO ASSESSMENT</button>
-            </div>
-            <div style="background:white; padding:8px; border-radius:8px; width:100%; max-width:780px; border:2px solid black; margin: 15px auto 10px auto;">
-                <div style="color:black; font-weight:900; font-size:0.65rem; text-align:center; letter-spacing:1px;">G1 ENTRANCE EVALUATION: CONSOLIDATED RESULTS</div>
             </div>
             <div id="reportGallery"></div>
         </div>
@@ -146,12 +152,10 @@
     const puzzles = [{s:"1 2 3 ?", a:"4"}, {s:"🍎 🍌 🍎 ?", a:"🍌"}, {s:"A B A ?", a:"B"}, {s:"2 4 6 ?", a:"8"}, {s:"🔴 🔵 🔴 ?", a:"🔵"}];
     const colours = ["RED", "BLUE", "GREEN", "YELLOW", "PINK"];
 
-    function initAssessment() {
+    function initApp() {
         let val = document.getElementById('crewNames').value;
         pilots = val ? val.split(',').map(n => n.trim()) : ["Child 1", "Child 2", "Child 3", "Child 4", "Child 5"];
-        while(pilots.length < 5) pilots.push("Child " + (pilots.length+1));
         document.getElementById('ambientLoop').play();
-        document.getElementById('logoWrap').style.display = 'block';
         document.getElementById('nav').style.display = 'flex';
         renderHud(); refreshUI(); move(1);
     }
@@ -161,21 +165,12 @@
             <div class="student-card" id="card${i}">
                 <div style="font-size:0.5rem; color:var(--neon-blue); font-weight:900;">${n}</div>
                 <div id="score${i}" style="font-weight:900; color:var(--gold); font-size:0.8rem;">0%</div>
-                <div class="phase-label">Comms</div>
-                <button class="btn-score yes" onclick="mark(${i},'c',true,this)">YES</button>
-                <button class="btn-score no" onclick="mark(${i},'c',false,this)">NO</button>
-                <div class="phase-label">Phonics</div>
-                <button class="btn-score yes" onclick="mark(${i},'p',true,this)">YES</button>
-                <button class="btn-score no" onclick="mark(${i},'p',false,this)">NO</button>
-                <div class="phase-label">Visual</div>
-                <button class="btn-score yes" onclick="mark(${i},'v',true,this)">YES</button>
-                <button class="btn-score no" onclick="mark(${i},'v',false,this)">NO</button>
-                <div class="phase-label">Logic</div>
-                <button class="btn-score yes" onclick="mark(${i},'l',true,this)">YES</button>
-                <button class="btn-score no" onclick="mark(${i},'l',false,this)">NO</button>
-                <div class="phase-label">Colours</div>
-                <button class="btn-score yes" onclick="mark(${i},'k',true,this)">YES</button>
-                <button class="btn-score no" onclick="mark(${i},'k',false,this)">NO</button>
+                ${['Comms','Phonics','Visual','Logic','Colours'].map((label, idx) => {
+                    const keys = ['c','p','v','l','k'];
+                    return `<div class="phase-label">${label}</div>
+                            <button class="btn-score yes" onclick="mark(${i},'${keys[idx]}',true,this)">YES</button>
+                            <button class="btn-score no" onclick="mark(${i},'${keys[idx]}',false,this)">NO</button>`;
+                }).join('')}
             </div>
         `).join('');
     }
@@ -188,42 +183,31 @@
             else btn.classList.remove('active'); 
         });
         document.getElementById(`score${p}`).innerText = scores[p]+"%";
-        document.getElementById(`card${p}`).classList.add('active');
     }
 
     function move(d) {
         document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
         cur += d;
-        if(cur < 0) cur = 0;
         if(document.getElementById(`s${cur}`)) document.getElementById(`s${cur}`).classList.add('active');
-        
-        if(cur === 6) { 
-            renderSummary(); 
-            document.getElementById('nav').style.display='none'; 
-        } else if (cur > 0) {
-            document.getElementById('nav').style.display='flex';
-        } else {
-            document.getElementById('nav').style.display='none';
-            document.getElementById('logoWrap').style.display = 'none';
-        }
+        if(cur === 6) { renderSummary(); document.getElementById('nav').style.display='none'; }
     }
 
     function cycle(p) { sub[p] = (sub[p]+1)%5; refreshUI(); }
 
     function refreshUI() {
         document.getElementById('p1').innerText = pilots[sub[1]]; document.getElementById('q1').innerText = `"${simpleUK[sub[1]]}"`;
-        document.getElementById('p2').innerText = pilots[sub[2]]; document.getElementById('g2').innerHTML = letters.split('').sort(()=>.5-Math.random()).slice(0,18).map(l => `<button class="game-card" onclick="this.style.background='var(--neon-green)'">${l}</button>`).join('');
+        document.getElementById('p2').innerText = pilots[sub[2]]; document.getElementById('g2').innerHTML = letters.split('').sort(()=>.5-Math.random()).slice(0,18).map(l => `<button class="game-card">${l}</button>`).join('');
         document.getElementById('p3').innerText = pilots[sub[3]]; document.getElementById('t3').innerText = `Find the ${spySets[sub[3]]} Stars!`;
-        document.getElementById('g3').innerHTML = Array(24).fill(0).map(()=>`<button class="game-card" onclick="this.style.background='var(--neon-green)'">${spySets[Math.floor(Math.random()*5)]}</button>`).join('');
+        document.getElementById('g3').innerHTML = Array(24).fill(0).map(()=>`<button class="game-card">${spySets[Math.floor(Math.random()*5)]}</button>`).join('');
         document.getElementById('p4').innerText = pilots[sub[4]]; document.getElementById('l4').innerText = puzzles[sub[4]].s;
         document.getElementById('p5').innerText = pilots[sub[5]]; document.getElementById('c5').innerText = `"Find the ${colours[sub[5]]} balloon!"`;
-        document.getElementById('balloons').innerHTML = ['red','blue','green','yellow','pink'].map(c => `<div style="width:30px; height:40px; border-radius:50%; background:${c}; cursor:pointer;" onclick="this.style.opacity=0"></div>`).join('');
+        document.getElementById('balloons').innerHTML = ['red','blue','green','yellow','pink'].map(c => `<div style="width:30px; height:40px; border-radius:50%; background:${c};"></div>`).join('');
     }
 
     function renderSummary() {
         document.getElementById('reportGallery').innerHTML = pilots.slice(0,5).map((n, i) => `
             <div class="score-strip">
-                <div><h3>${n.toUpperCase()}</h3><div style="font-size:0.4rem; color:#999;">REF: CLS-0${i+1}</div></div>
+                <div><h3>${n.toUpperCase()}</h3></div>
                 <div class="final-score">SCORE: ${scores[i]}%</div>
                 <div class="tag-container">
                     <div class="tag ${logs[i].c?'pass':''}">COMMS</div>
